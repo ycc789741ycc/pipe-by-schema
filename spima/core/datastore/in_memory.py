@@ -10,6 +10,9 @@ class InMemoryDataStore(BaseDataStore):
     def get(self, key: str) -> Any:
         return self.data.get(key)
 
+    def exist(self, key: str) -> bool:
+        return key in self.data
+
     def set(self, key: str, value: Any) -> None:
         self.data[key] = value
 

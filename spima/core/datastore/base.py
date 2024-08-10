@@ -8,6 +8,10 @@ class BaseDataStore(ABC):
         raise NotImplementedError("Subclasses should implement this method.")
 
     @abstractmethod
+    def exist(self, key: str) -> bool:
+        raise NotImplementedError("Subclasses should implement this method.")
+
+    @abstractmethod
     def set(self, key: str, value: Any) -> None:
         raise NotImplementedError("Subclasses should implement this method.")
 

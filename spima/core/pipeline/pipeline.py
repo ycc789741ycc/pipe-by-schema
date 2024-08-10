@@ -106,6 +106,8 @@ class Pipeline:
         return payload
 
     def get_data(self, key: str) -> Any:
+        if not self.data_store.exist(key):
+            raise ValueError(f"Key {key} is not existed in data store")
         return self.data_store.get(key)
 
     def clear_data(self) -> None:
