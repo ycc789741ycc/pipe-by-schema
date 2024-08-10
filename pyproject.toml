@@ -17,7 +17,77 @@ black = "^24.8.0"
 isort = "^5.13.2"
 pylint = "^3.2.6"
 mypy = "^1.11.1"
+bandit = "^1.7.9"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pylint.'MESSAGES CONTROL']
+max-line-length = 120
+disable = [
+
+  # To keep
+  "fixme",
+  "c-extension-no-member",
+
+  # To review:
+  "missing-docstring",
+  "unused-argument",
+  "no-member",
+  "line-too-long",
+  "protected-access",
+  "too-few-public-methods",
+  "raise-missing-from",
+  "invalid-name",
+  "duplicate-code",
+  "arguments-differ",
+  "consider-using-f-string",
+  "no-else-return",
+  "attribute-defined-outside-init",
+  "super-with-arguments",
+  "redefined-builtin",
+  "abstract-method",
+  "unspecified-encoding",
+  "unidiomatic-typecheck",
+  "no-name-in-module",
+  "consider-using-with",
+  "redefined-outer-name",
+  "arguments-renamed",
+  "unnecessary-pass",
+  "broad-except",
+  "unnecessary-comprehension",
+  "subprocess-run-check",
+  "singleton-comparison",
+  "consider-iterating-dictionary",
+  "undefined-loop-variable",
+  "consider-using-in",
+  "bare-except",
+  "unexpected-keyword-arg",
+  "simplifiable-if-expression",
+  "use-list-literal",
+  "broad-exception-raised",
+  "use-dict-literal",
+  "logging-not-lazy",
+  "logging-fstring-interpolation",
+]
+
+[tool.pylint.'DESIGN']
+max-args = 38           # Default is 5
+max-attributes = 28     # Default is 7
+max-branches = 34       # Default is 12
+max-locals = 45         # Default is 15
+max-module-lines = 2468 # Default is 1000
+max-nested-blocks = 9   # Default is 5
+max-statements = 206    # Default is 50
+
+[tool.pylint.'SIMILARITIES']
+min-similarity-lines = 6
+
+[tool.black]
+line-length = 120
+target-version = [ "py38", "py39", "py310",]
+exclude = "((.eggs | .git | .pytest_cache | build | dist))"
+
+[tool.mypy]
+ignore_missing_imports = true
