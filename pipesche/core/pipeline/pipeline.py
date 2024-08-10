@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class MergeInputsSetting:
-    input_keys: List[str]
+class MergeDataSetting:
+    keys: List[str]
     merge_function: Callable
 
 
@@ -21,7 +21,7 @@ class Pipeline:
         self.data_store = data_store
         self._graph = nx.DiGraph()
         self._data_types: Dict[str, Optional[type]] = dict()
-        self._merge_inputs_settings: Dict[str, MergeInputsSetting] = dict()
+        self._merge_data_settings: Dict[str, MergeDataSetting] = dict()
         self._registered_node_names: Set[str] = set()
         self._registered_keys: Set[str] = set()
 
@@ -82,13 +82,13 @@ class Pipeline:
     def get_node(self, node_name: str) -> BaseNode:
         return self._graph.nodes[node_name]["node"]
 
-    def merge_inputs(self, input_keys: List[str], new_key: str, merge_function: Callable) -> None:
+    def merge_data(self, keys: List[str], new_key: str, merge_function: Callable) -> None:
         if new_key in self._registered_keys:
             raise ValueError(f"Key {new_key} is already registered")
 
         self._data_types[new_key] = merge_function.__annotations__.get("return")
         self._registered_keys.add(new_key)
-        self._merge_inputs_settings[new_key] = MergeInputsSetting(input_keys, merge_function)
+        self._merge_data_settings[new_key] = MergeDataSetting(keys, merge_function)
 
     def run(self, inputs_data: Optional[Dict[str, Any]] = None) -> None:
         if inputs_data is not None:
@@ -127,10 +127,10 @@ class Pipeline:
             self.data_store.delete(key)
 
     def _get_payload_by_input_key(self, input_key: str) -> Any:
-        if input_key in self._merge_inputs_settings:
-            combined_data_setting = self._merge_inputs_settings[input_key]
+        if input_key in self._merge_data_settings:
+            combined_data_setting = self._merge_data_settings[input_key]
             payload = combined_data_setting.merge_function(
-                *(self.data_store.get(key) for key in combined_data_setting.input_keys)
+                *(self.data_store.get(key) for key in combined_data_setting.keys)
             )
         else:
             payload = self.data_store.get(input_key)
@@ -147,6 +147,6 @@ class Pipeline:
     def clear_nodes(self) -> None:
         self._graph.clear()
         self._data_types.clear()
-        self._merge_inputs_settings.clear()
+        self._merge_data_settings.clear()
         self._registered_node_names.clear()
         self._registered_keys.clear()

@@ -93,8 +93,8 @@ def test_pipeline_running_with_merge_inputs():
     def merge_numbers(x: int, y: int) -> MessagePayload:
         return MessagePayload([str(x), str(y)])
 
-    pipeline.merge_inputs(["source", "node2"], "combine.source.node2", merge_add_payload_and_number)
-    pipeline.merge_inputs(["node2", "node4"], "combine.node2.node4", merge_numbers)
+    pipeline.merge_data(["source", "node2"], "combine.source.node2", merge_add_payload_and_number)
+    pipeline.merge_data(["node2", "node4"], "combine.node2.node4", merge_numbers)
 
     pipeline.run({"source": AddPayload(1, 2)})
 
@@ -137,7 +137,7 @@ def test_new_key_generate_by_merge_inputs_should_be_unique():
         return x
 
     with pytest.raises(ValueError):
-        pipeline.merge_inputs(["input_1", "input_2"], "node1", merge_function)
+        pipeline.merge_data(["input_1", "input_2"], "node1", merge_function)
 
 
 def test_pipeline_input_keys_should_not_conflict_with_existed_keys():
