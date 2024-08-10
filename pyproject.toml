@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "pipe-by-schema"
+version = "0.1.0"
+description = "Using a defined data schema to pass data between nodes in the pipeli."
+authors = ["Yoshi Gao <yoshi4868686@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+networkx = "^3.2.1"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
