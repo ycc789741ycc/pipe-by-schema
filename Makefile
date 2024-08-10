@@ -1,5 +1,8 @@
 .PHONY: help install install-dev unit-test lint type-check security-check static-checks format publish clean
 
+PYPI_USERNAME ?= null
+PYPI_PASSWORD ?= null
+
 install:
 	@echo "Installing dependencies"
 	@poetry install
@@ -33,7 +36,7 @@ format:
 
 publish:
 	@echo "Publishing package"
-	@poetry publish --build
+	@poetry publish --build --username $(PYPI_USERNAME) --password $(PYPI_PASSWORD)
 
 clean:
 	find . -name '*.pyc' -exec rm -f {} +
