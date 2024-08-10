@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Generic, Optional, TypeVar
+from typing import Generic, TypeVar
 
 
 T = TypeVar('T')
@@ -8,7 +8,6 @@ U = TypeVar('U')
 
 class BaseNode(ABC, Generic[T, U]):
     def __init__(self, name):
-        # NOTE Name is globally unique should be checked
         self.name = name
 
     @abstractmethod
