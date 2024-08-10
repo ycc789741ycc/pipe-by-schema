@@ -9,6 +9,10 @@ Using defined data schema to passing between nodes of pipeline, much more easier
 * Python 3.9+
 * poetry 1.7.1
 ```bash
+pip install poetry
+```
+or
+```bash
 poetry install
 ```
 

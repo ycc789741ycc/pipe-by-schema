@@ -156,3 +156,6 @@ cython_debug/
 
 # Dev
 tmp/
+
+# Secret
+.pypirc
