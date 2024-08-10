@@ -59,9 +59,9 @@ def test_pipeline_running_with_correct_sequence():
     pipeline.add_node(node3, input_key="input_3")
     pipeline.add_node(node4, input_key="input_4")
 
-    pipeline.connect(node1, node4)
-    pipeline.connect(node2, node4)
-    pipeline.connect(node4, node3)
+    pipeline.connect("node1", "node4")
+    pipeline.connect("node2", "node4")
+    pipeline.connect("node4", "node3")
 
     pipeline.run({"input_1": 1, "input_2": 2, "input_3": 3, "input_4": 4})
 
@@ -84,8 +84,8 @@ def test_pipeline_running_with_merge_inputs():
     pipeline.add_node(node3)
     pipeline.add_node(node4, input_key="combine.source.node2")
     pipeline.add_node(node5, input_key="combine.node2.node4")
-    pipeline.connect(node2, node4)
-    pipeline.connect(node4, node5)
+    pipeline.connect("node2", "node4")
+    pipeline.connect("node4", "node5")
 
     def merge_add_payload_and_number(payload: AddPayload, number: int) -> AddPayload:
         return AddPayload(payload.x, payload.y + number)
@@ -166,7 +166,7 @@ def test_pipeline_running_with_clear_data():
     pipeline.add_node(node1, input_key="input_1")
     pipeline.add_node(node2, input_key="input_2")
 
-    pipeline.connect(node1, node2)
+    pipeline.connect("node1", "node2")
     pipeline.run({"input_1": AddPayload(x=1, y=2), "input_2": AddPayload(x=3, y=4)})
 
     assert pipeline.get_data("node2") == 7
@@ -184,7 +184,7 @@ def test_pipeline_clear_nodes():
     pipeline = Pipeline()
     pipeline.add_node(node1, input_key="input_1")
     pipeline.add_node(node2, input_key="input_2")
-    pipeline.connect(node1, node2)
+    pipeline.connect("node1", "node2")
 
     with pytest.raises(ValueError):
         pipeline.run()
