@@ -174,3 +174,19 @@ def test_pipeline_running_with_clear_data():
 
     with pytest.raises(ValueError):
         pipeline.get_data("node2")
+
+
+def test_pipeline_clear_nodes():
+    node1 = AddNode("node1")
+    node2 = AddNode("node2")
+
+    pipeline = Pipeline()
+    pipeline.add_node(node1, input_key="input_1")
+    pipeline.add_node(node2, input_key="input_2")
+    pipeline.connect(node1, node2)
+
+    with pytest.raises(ValueError):
+        pipeline.run()
+
+    pipeline.clear_nodes()
+    pipeline.run()

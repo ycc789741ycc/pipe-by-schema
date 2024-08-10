@@ -18,7 +18,7 @@ class Pipeline:
     def __init__(self, data_store: BaseDataStore = InMemoryDataStore()):
         self.data_store = data_store
         self._graph = nx.DiGraph()
-        self._input_types: Dict[str, type] = dict()
+        self._data_types: Dict[str, type] = dict()
         self._merge_inputs_settings: Dict[str, MergeInputsSetting] = dict()
         self._registered_node_names = set()
         self._registered_keys = set()
@@ -42,7 +42,7 @@ class Pipeline:
         self._registered_keys.add(output_key)
 
     def _register_output_type(self, output_key: str, node: BaseNode) -> None:
-        self._input_types[output_key] = node.run.__annotations__.get('return')
+        self._data_types[output_key] = node.run.__annotations__.get('return')
 
     def connect(self, from_node: BaseNode, to_node: BaseNode) -> None:
         self._graph.add_edge(from_node.name, to_node.name)
@@ -56,7 +56,7 @@ class Pipeline:
                 input_key = subgraph.nodes[node_name]['input_key']
                 if input_key is not None:
                     node_input_type = node.run.__annotations__.get('payload')
-                    registered_input_type = self._input_types.get(input_key)
+                    registered_input_type = self._data_types.get(input_key)
                     if registered_input_type is None:
                         raise ValueError(f"Input key {input_key} is not registered")
                     if node_input_type != registered_input_type:
@@ -65,18 +65,11 @@ class Pipeline:
     def get_node(self, node_name: str) -> BaseNode:
         return self._graph.nodes[node_name]['node']
 
-    def _setup_inputs_data(self, inputs_data: Dict[str, Any]) -> None:
-        for key, value in inputs_data.items():
-            if key in self._registered_keys:
-                raise ValueError(f"Key {key} is already registered")
-            self._input_types[key] = type(value)
-            self.data_store.set(key, value)
-
     def merge_inputs(self, input_keys: List[str], new_key: str, merge_function: Callable) -> None:
         if new_key in self._registered_keys:
             raise ValueError(f"Key {new_key} is already registered")
 
-        self._input_types[new_key] = merge_function.__annotations__.get('return')
+        self._data_types[new_key] = merge_function.__annotations__.get('return')
         self._registered_keys.add(new_key)
         self._merge_inputs_settings[new_key] = MergeInputsSetting(input_keys, merge_function)
 
@@ -96,6 +89,20 @@ class Pipeline:
                     payload = self._get_payload_by_input_key(input_key)
                 output = node.run(payload)
                 self.data_store.set(output_key, output)
+        if inputs_data is not None:
+            self._remove_inputs_data(inputs_data)
+
+    def _setup_inputs_data(self, inputs_data: Dict[str, Any]) -> None:
+        for key, value in inputs_data.items():
+            if key in self._registered_keys:
+                raise ValueError(f"Key {key} is already registered")
+            self._data_types[key] = type(value)
+            self.data_store.set(key, value)
+
+    def _remove_inputs_data(self, inputs_data: Dict[str, Any]) -> None:
+        for key in inputs_data.keys():
+            del self._data_types[key]
+            self.data_store.delete(key)
 
     def _get_payload_by_input_key(self, input_key: str) -> Any:
         if input_key in self._merge_inputs_settings:
@@ -112,3 +119,10 @@ class Pipeline:
 
     def clear_data(self) -> None:
         self.data_store.clear()
+
+    def clear_nodes(self) -> None:
+        self._graph.clear()
+        self._data_types.clear()
+        self._merge_inputs_settings.clear()
+        self._registered_node_names.clear()
+        self._registered_keys.clear()
