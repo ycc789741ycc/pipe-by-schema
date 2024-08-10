@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List, Optional
 
@@ -6,6 +7,9 @@ import networkx as nx
 from spima.core.datastore import BaseDataStore
 from spima.core.datastore import InMemoryDataStore
 from spima.core.node.base import BaseNode
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -76,19 +80,20 @@ class Pipeline:
     def run(self, inputs_data: Optional[Dict[str, Any]]=None) -> None:
         if inputs_data is not None:
             self._setup_inputs_data(inputs_data)
+
         self._validate_nodes_input()
         subgraphs: List[nx.DiGraph] = [self._graph.subgraph(subgraph_name) for subgraph_name in nx.weakly_connected_components(self._graph)]
         for subgraph in subgraphs:
-            nodes_to_run = nx.topological_sort(subgraph)
+            nodes_to_run = list(nx.topological_sort(subgraph))
+            logger.info(f"Running pipeline in topological order: " + " -> ".join([node_name for node_name in nodes_to_run]))
             for node_name in nodes_to_run:
                 node: BaseNode = subgraph.nodes[node_name]['node']
                 input_key: str = subgraph.nodes[node_name]['input_key']
                 output_key: str = subgraph.nodes[node_name]['output_key']
-                payload = None
-                if input_key is not None:
-                    payload = self._get_payload_by_input_key(input_key)
+                payload = self._get_payload_by_input_key(input_key) if input_key is not None else None
                 output = node.run(payload)
                 self.data_store.set(output_key, output)
+
         if inputs_data is not None:
             self._remove_inputs_data(inputs_data)
 
