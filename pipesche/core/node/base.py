@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-
-T = TypeVar('T')
-U = TypeVar('U')
+T = TypeVar("T")
+U = TypeVar("U")
 
 
 class BaseNode(ABC, Generic[T, U]):

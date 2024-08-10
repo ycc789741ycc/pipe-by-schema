@@ -18,7 +18,7 @@ class BaseDataStore(ABC):
     @abstractmethod
     def delete(self, key: str) -> None:
         raise NotImplementedError("Subclasses should implement this method.")
-    
+
     @abstractmethod
     def clear(self) -> None:
         raise NotImplementedError("Subclasses should implement this method.")

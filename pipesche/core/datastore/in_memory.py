@@ -1,11 +1,11 @@
-from typing import Any
+from typing import Any, Dict
 
 from pipesche.core.datastore.base import BaseDataStore
 
 
 class InMemoryDataStore(BaseDataStore):
     def __init__(self) -> None:
-        self.data = {}
+        self.data: Dict[str, Any] = {}
 
     def get(self, key: str) -> Any:
         return self.data.get(key)

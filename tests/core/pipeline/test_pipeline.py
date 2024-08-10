@@ -7,7 +7,6 @@ import pytest
 from pipesche.core.node import BaseNode
 from pipesche.core.pipeline import Pipeline
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -23,18 +22,17 @@ class MessagePayload:
 
 
 class PrintNode(BaseNode[None, None]):
-    def __init__(self, name):
-        super().__init__(name)
-
-    def run(self, payload: None=None) -> None:
+    def run(self, payload: None = None) -> None:
         message = "No message found"
         logger.debug(f"Node {self.name}: {message}")
+
 
 class AddNode(BaseNode[AddPayload, int]):
     def run(self, payload: AddPayload) -> int:
         result = payload.x + payload.y
         logger.debug(f"Node {self.name}: {payload.x} + {payload.y} = {result}")
         return result
+
 
 class MessageNode(BaseNode[MessagePayload, str]):
     def run(self, payload: MessagePayload) -> str:
@@ -46,9 +44,6 @@ class MessageNode(BaseNode[MessagePayload, str]):
 def test_pipeline_running_with_correct_sequence():
     class Node(BaseNode[int, None]):
         results = []
-
-        def __init__(self, name):
-            super().__init__(name)
 
         def run(self, payload: int) -> None:
             self.results.append(payload)
@@ -154,7 +149,13 @@ def test_pipeline_input_keys_should_not_conflict_with_existed_keys():
     pipeline.add_node(node2, input_key="input_2")
 
     with pytest.raises(ValueError):
-        pipeline.run({"input_1": AddPayload(x=1, y=2), "input_2": AddPayload(x=3, y=4), "node1": AddPayload(x=5, y=6)})
+        pipeline.run(
+            {
+                "input_1": AddPayload(x=1, y=2),
+                "input_2": AddPayload(x=3, y=4),
+                "node1": AddPayload(x=5, y=6),
+            }
+        )
 
 
 def test_pipeline_running_with_clear_data():

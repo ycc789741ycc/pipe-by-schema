@@ -1,13 +1,11 @@
 import logging
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Set
 
 import networkx as nx
 
-from pipesche.core.datastore import BaseDataStore
-from pipesche.core.datastore import InMemoryDataStore
+from pipesche.core.datastore import BaseDataStore, InMemoryDataStore
 from pipesche.core.node.base import BaseNode
-
 
 logger = logging.getLogger(__name__)
 
@@ -22,12 +20,17 @@ class Pipeline:
     def __init__(self, data_store: BaseDataStore = InMemoryDataStore()):
         self.data_store = data_store
         self._graph = nx.DiGraph()
-        self._data_types: Dict[str, type] = dict()
+        self._data_types: Dict[str, Optional[type]] = dict()
         self._merge_inputs_settings: Dict[str, MergeInputsSetting] = dict()
-        self._registered_node_names = set()
-        self._registered_keys = set()
+        self._registered_node_names: Set[str] = set()
+        self._registered_keys: Set[str] = set()
 
-    def add_node(self, node: BaseNode, input_key: Optional[str] = None, output_key: Optional[str] = None) -> None:
+    def add_node(
+        self,
+        node: BaseNode,
+        input_key: Optional[str] = None,
+        output_key: Optional[str] = None,
+    ) -> None:
         if output_key is None:
             output_key = node.name
         self._validate_node_name_and_output_key_is_unique(node.name, output_key)
@@ -52,44 +55,52 @@ class Pipeline:
         self._graph.add_edge(from_node.name, to_node.name)
 
     def _validate_nodes_input(self) -> None:
-        subgraphs: List[nx.DiGraph] = [self._graph.subgraph(subgraph_name) for subgraph_name in nx.weakly_connected_components(self._graph)]
+        subgraphs: List[nx.DiGraph] = [
+            self._graph.subgraph(subgraph_name) for subgraph_name in nx.weakly_connected_components(self._graph)
+        ]
         for subgraph in subgraphs:
             nodes_to_run = nx.topological_sort(subgraph)
             for node_name in nodes_to_run:
-                node: BaseNode = subgraph.nodes[node_name]['node']
-                input_key = subgraph.nodes[node_name]['input_key']
+                node: BaseNode = subgraph.nodes[node_name]["node"]
+                input_key = subgraph.nodes[node_name]["input_key"]
                 if input_key is not None:
-                    node_input_type = node.run.__annotations__.get('payload')
+                    node_input_type = node.run.__annotations__.get("payload")
                     registered_input_type = self._data_types.get(input_key)
                     if registered_input_type is None:
                         raise ValueError(f"Input key {input_key} is not registered")
                     if node_input_type != registered_input_type:
-                        raise ValueError(f"Node {node.name} expects input of type {node_input_type} but got {registered_input_type}")
+                        raise ValueError(
+                            f"Node {node.name} expects input of type {node_input_type} but got {registered_input_type}"
+                        )
 
     def get_node(self, node_name: str) -> BaseNode:
-        return self._graph.nodes[node_name]['node']
+        return self._graph.nodes[node_name]["node"]
 
     def merge_inputs(self, input_keys: List[str], new_key: str, merge_function: Callable) -> None:
         if new_key in self._registered_keys:
             raise ValueError(f"Key {new_key} is already registered")
 
-        self._data_types[new_key] = merge_function.__annotations__.get('return')
+        self._data_types[new_key] = merge_function.__annotations__.get("return")
         self._registered_keys.add(new_key)
         self._merge_inputs_settings[new_key] = MergeInputsSetting(input_keys, merge_function)
 
-    def run(self, inputs_data: Optional[Dict[str, Any]]=None) -> None:
+    def run(self, inputs_data: Optional[Dict[str, Any]] = None) -> None:
         if inputs_data is not None:
             self._setup_inputs_data(inputs_data)
 
         self._validate_nodes_input()
-        subgraphs: List[nx.DiGraph] = [self._graph.subgraph(subgraph_name) for subgraph_name in nx.weakly_connected_components(self._graph)]
+        subgraphs: List[nx.DiGraph] = [
+            self._graph.subgraph(subgraph_name) for subgraph_name in nx.weakly_connected_components(self._graph)
+        ]
         for subgraph in subgraphs:
             nodes_to_run = list(nx.topological_sort(subgraph))
-            logger.info(f"Running pipeline in topological order: " + " -> ".join([node_name for node_name in nodes_to_run]))
+            logger.info(
+                "Running pipeline in topological order: " + " -> ".join([node_name for node_name in nodes_to_run])
+            )
             for node_name in nodes_to_run:
-                node: BaseNode = subgraph.nodes[node_name]['node']
-                input_key: str = subgraph.nodes[node_name]['input_key']
-                output_key: str = subgraph.nodes[node_name]['output_key']
+                node: BaseNode = subgraph.nodes[node_name]["node"]
+                input_key: str = subgraph.nodes[node_name]["input_key"]
+                output_key: str = subgraph.nodes[node_name]["output_key"]
                 payload = self._get_payload_by_input_key(input_key) if input_key is not None else None
                 output = node.run(payload)
                 self.data_store.set(output_key, output)
@@ -112,7 +123,9 @@ class Pipeline:
     def _get_payload_by_input_key(self, input_key: str) -> Any:
         if input_key in self._merge_inputs_settings:
             combined_data_setting = self._merge_inputs_settings[input_key]
-            payload = combined_data_setting.merge_function(*(self.data_store.get(key) for key in combined_data_setting.input_keys))
+            payload = combined_data_setting.merge_function(
+                *(self.data_store.get(key) for key in combined_data_setting.input_keys)
+            )
         else:
             payload = self.data_store.get(input_key)
         return payload
