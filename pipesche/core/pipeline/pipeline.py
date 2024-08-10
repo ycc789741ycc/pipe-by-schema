@@ -49,7 +49,7 @@ class Pipeline:
         self._registered_keys.add(output_key)
 
     def _register_output_type(self, output_key: str, node: BaseNode) -> None:
-        self._data_types[output_key] = node.run.__annotations__.get('return')
+        self._data_types[output_key] = node.run.__annotations__.get("return")
 
     def connect(self, from_node: BaseNode, to_node: BaseNode) -> None:
         self._graph.add_edge(from_node.name, to_node.name)

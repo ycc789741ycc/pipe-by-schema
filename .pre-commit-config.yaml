@@ -1,0 +1,26 @@
+repos:
+  - repo: local
+    hooks:
+      - id: format-code
+        name: Format Code with Black and Isort
+        entry: make format
+        language: system
+        stages: [commit]
+
+      - id: lint
+        name: Run Linter with Pylint
+        entry: make lint
+        language: system
+        stages: [commit]
+
+      - id: type-check
+        name: Run Type Checker with Mypy
+        entry: make type-check
+        language: system
+        stages: [commit]
+
+      - id: security-check
+        name: Run Security Check with Bandit
+        entry: make security-check
+        language: system
+        stages: [commit]
