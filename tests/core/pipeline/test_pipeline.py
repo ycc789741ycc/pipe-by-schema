@@ -4,8 +4,8 @@ from typing import List
 
 import pytest
 
-from spima.core.node import BaseNode
-from spima.core.pipeline import Pipeline
+from pipesche.core.node import BaseNode
+from pipesche.core.pipeline import Pipeline
 
 
 logger = logging.getLogger(__name__)

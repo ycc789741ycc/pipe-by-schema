@@ -1,6 +1,6 @@
 from typing import Any
 
-from spima.core.datastore.base import BaseDataStore
+from pipesche.core.datastore.base import BaseDataStore
 
 
 class InMemoryDataStore(BaseDataStore):

@@ -4,9 +4,9 @@ from typing import Any, Callable, Dict, List, Optional
 
 import networkx as nx
 
-from spima.core.datastore import BaseDataStore
-from spima.core.datastore import InMemoryDataStore
-from spima.core.node.base import BaseNode
+from pipesche.core.datastore import BaseDataStore
+from pipesche.core.datastore import InMemoryDataStore
+from pipesche.core.node.base import BaseNode
 
 
 logger = logging.getLogger(__name__)
