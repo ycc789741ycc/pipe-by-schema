@@ -50,6 +50,10 @@ clean:
 	rm -rf .pytest_cache/
 
 release:
+	@if [ "$$(git rev-parse --abbrev-ref HEAD)" != "master" ]; then \
+		echo "Error: You are not on the master branch! Please switch to the master branch before releasing."; \
+		exit 1; \
+	fi
 	@echo "Current version is: $$(poetry version --short)"
 	@echo "Enter the new version (e.g., 1.0.1):"
 	@read VERSION; \
