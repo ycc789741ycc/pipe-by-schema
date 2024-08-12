@@ -4,10 +4,6 @@
 name: Python application
 
 on:
-  push:
-    branches: [ "master" ]
-    tags-ignore:
-      - '*'
   pull_request:
     branches: [ "master" ]
 
