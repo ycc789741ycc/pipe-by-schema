@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pipesche"
-version = "0.1.5"
+version = "0.1.6"
 description = "Using a defined data schema to pass data between nodes in the pipeli."
 authors = ["Yoshi Gao <yoshi4868686@gmail.com>"]
 license = "MIT"
