@@ -48,3 +48,15 @@ clean:
 	rm -rf docs/build
 	rm -rf docs/.docusaurus
 	rm -rf .pytest_cache/
+
+release:
+	@echo "Current version is: $$(poetry version --short)"
+	@echo "Enter the new version (e.g., 1.0.1):"
+	@read VERSION; \
+	poetry version $$VERSION && \
+	git add pyproject.toml && \
+	git commit -m "Bump version to $$VERSION" && \
+	git tag -a "$$VERSION" -m "Release version $$VERSION" && \
+	git push origin master && \
+	git push origin "$$VERSION" && \
+	echo "Version updated to $$VERSION, pyproject.toml committed, and tag pushed to Git."
